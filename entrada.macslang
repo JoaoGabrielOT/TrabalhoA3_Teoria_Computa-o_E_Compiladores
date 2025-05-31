@@ -1,0 +1,3 @@
+var idade: int = 25;
+
+var nome: string = "João";

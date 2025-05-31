@@ -1,0 +1,26 @@
+<programa> ::= <comando>* EOF
+
+<comando> ::= <declaracao> | <print> | <input> | <if> | <while> | <for> | <func>
+
+<declaracao> ::= "var" IDENTIFICADOR ":" <tipo> [ "=" <valor> ] ";"
+
+<tipo> ::= "int" | "float" | "char" | "bool" | "string"
+
+<valor> ::= NUMERO | TEXTO | IDENTIFICADOR
+
+<print> ::= "print" "(" <valor> ")" ";"
+
+<input> ::= "input" "(" IDENTIFICADOR ")" ";"
+
+<if> ::= "if" "(" <condicao> ")" "{" <comando>* "}"
+         [ "else" "{" <comando>* "}" ]
+
+<while> ::= "while" "(" <condicao> ")" "{" <comando>* "}"
+
+<for> ::= "for" "(" <declaracao> <condicao> ";" <incremento> ")" "{" <comando>* "}"
+
+<func> ::= "func" IDENTIFICADOR "(" ")" "{" <comando>* "}"
+
+<condicao> ::= IDENTIFICADOR | NUMERO
+
+<incremento> ::= IDENTIFICADOR | NUMERO
