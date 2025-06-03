@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <unordered_map>
 #include "token.hpp"
 
 class Parser {
@@ -8,12 +9,18 @@ public:
     bool parse();
 
 private:
+    std::vector<std::unordered_map<std::string, std::string>> escopos_;
     std::vector<Token> tokens_;
     size_t pos_;
 
     Token peek();
     Token advance();
     bool match(TokenTipo tipo);
+    void entrarEscopo();
+    void sairEscopo();
+    bool declararVariavel(const std::string& nome, const std::string& tipo);
+    bool variavelDeclarada(const std::string& nome);
+    std::string tipoVariavel(const std::string& nome);
 
     bool parse_comando();
     bool parse_declaracao();

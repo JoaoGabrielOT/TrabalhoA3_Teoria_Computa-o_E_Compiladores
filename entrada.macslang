@@ -1,3 +1,40 @@
-var idade: int = 25;
-
+// Variáveis globais
 var nome: string = "João";
+var idade: int = 25;
+var ativo: bool = true;
+var letra: char = 'J';
+var nota: float = 8.5;
+
+print(nome);
+print(idade);
+print(ativo);
+print(letra);
+print(nota);
+
+// Função simples
+func saudacao(): void {
+    var mensagem: string = "Bem-vindo!";
+    print(mensagem);
+}
+
+// If com escopo próprio
+if (ativo) {
+    var status: string = "Online";
+    print(status);
+}
+
+// While com escopo próprio
+while (ativo) {
+    var verificado: bool = true;
+    print(verificado);
+    break;
+}
+
+// For com escopo próprio
+for (var i: int = 0; i; i) {
+    var dentroDoFor: string = "Repetindo...";
+    print(dentroDoFor);
+}
+
+// Usando variável global depois dos blocos
+print(nome);

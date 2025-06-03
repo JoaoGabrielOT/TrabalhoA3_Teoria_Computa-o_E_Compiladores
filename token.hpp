@@ -1,4 +1,3 @@
-// token.hpp
 #pragma once
 #include <string>
 

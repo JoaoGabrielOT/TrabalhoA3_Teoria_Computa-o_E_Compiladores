@@ -1,8 +1,7 @@
-// lexer.cpp
 #include "lexer.hpp"
 #include <cctype>
 
-Lexer::Lexer(const std::string& texto) : texto_(texto), pos_(0) {
+Lexer::Lexer(const std::string & texto) : texto_(texto), pos_(0) {
     atual_ = texto_.empty() ? '\0' : texto_[0];
 }
 
@@ -23,6 +22,12 @@ void Lexer::pula_espaco() {
 
 Token Lexer::proximo_token() {
     pula_espaco();
+    if (atual_ == '/' && pos_ + 1 < texto_.size() && texto_[pos_ + 1] == '/') {
+        while (atual_ != '\n' && atual_ != '\0') {
+            avanca();
+        }
+        return proximo_token();
+    }
     if (atual_ == '\0') {
         return {FIM_ARQUIVO, ""};
     }
@@ -54,6 +59,18 @@ Token Lexer::proximo_token() {
     if (atual_ == '}') {
         avanca();
         return {FECHA_CHAVE, "}"};
+    }
+    
+    if (atual_ == '\'') {
+        avanca(); // pula a aspa
+        if (atual_ != '\0' && texto_[pos_ + 1] == '\'') {
+            char c = atual_;
+            avanca(); // consome o caractere
+            avanca(); // consome a aspa final
+            return {CHAR, std::string(1, c)};
+        } else {
+            return {ERRO, "Caractere mal formatado"};
+        }
     }
 
     if (atual_ == '"') {
@@ -89,11 +106,20 @@ Token Lexer::identifica_texto() {
 
 Token Lexer::identifica_numero() {
     std::string valor;
-    while (isdigit(atual_)) {
+    bool tem_ponto = false;
+
+    while (isdigit(atual_) || (atual_ == '.' && !tem_ponto)) {
+        if (atual_ == '.') {
+            tem_ponto = true;
+        }
         valor += atual_;
         avanca();
     }
-    // Para simplificar, não considera float aqui, pode melhorar depois.
+
+    if (tem_ponto) {
+        return {NUMERO, valor};  // Ainda usamos NUMERO, sem novo token FLOAT_LITERAL
+    }
+
     return {NUMERO, valor};
 }
 

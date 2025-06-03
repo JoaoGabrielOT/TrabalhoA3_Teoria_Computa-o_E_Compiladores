@@ -1,11 +1,10 @@
-// lexer.hpp
 #pragma once
 #include <string>
 #include "token.hpp"
 
 class Lexer {
 public:
-    Lexer(const std::string& texto);
+    Lexer(const std::string & texto);
     Token proximo_token();
 
 private:
