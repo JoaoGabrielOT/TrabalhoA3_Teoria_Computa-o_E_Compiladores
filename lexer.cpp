@@ -22,45 +22,65 @@ void Lexer::pula_espaco() {
 
 Token Lexer::proximo_token() {
     pula_espaco();
+
+    // Comentário //
     if (atual_ == '/' && pos_ + 1 < texto_.size() && texto_[pos_ + 1] == '/') {
         while (atual_ != '\n' && atual_ != '\0') {
             avanca();
         }
         return proximo_token();
     }
+
+    // Fim do texto
     if (atual_ == '\0') {
         return {FIM_ARQUIVO, ""};
     }
 
-    if (atual_ == ':') {
-        avanca();
-        return {DOIS_PONTOS, ":"};
+    // Operadores compostos (duplos)
+    if (atual_ == '=' && pos_ + 1 < texto_.size() && texto_[pos_ + 1] == '=') {
+        avanca(); avanca();
+        return {IGUAL_IGUAL, "=="};
     }
-    if (atual_ == '=') {
-        avanca();
-        return {IGUAL, "="};
+    if (atual_ == '!' && pos_ + 1 < texto_.size() && texto_[pos_ + 1] == '=') {
+        avanca(); avanca();
+        return {DIFERENTE, "!="};
     }
-    if (atual_ == ';') {
-        avanca();
-        return {PONTO_E_VIRGULA, ";"};
+    if (atual_ == '<' && pos_ + 1 < texto_.size() && texto_[pos_ + 1] == '=') {
+        avanca(); avanca();
+        return {MENOR_IGUAL, "<="};
     }
-    if (atual_ == '(') {
-        avanca();
-        return {ABRE_PARENTESE, "("};
+    if (atual_ == '>' && pos_ + 1 < texto_.size() && texto_[pos_ + 1] == '=') {
+        avanca(); avanca();
+        return {MAIOR_IGUAL, ">="};
     }
-    if (atual_ == ')') {
-        avanca();
-        return {FECHA_PARENTESE, ")"};
+    if (atual_ == '&' && pos_ + 1 < texto_.size() && texto_[pos_ + 1] == '&') {
+        avanca(); avanca();
+        return {E_LOGICO, "&&"};
     }
-    if (atual_ == '{') {
-        avanca();
-        return {ABRE_CHAVE, "{"};
+    if (atual_ == '|' && pos_ + 1 < texto_.size() && texto_[pos_ + 1] == '|') {
+        avanca(); avanca();
+        return {OU_LOGICO, "||"};
     }
-    if (atual_ == '}') {
-        avanca();
-        return {FECHA_CHAVE, "}"};
-    }
-    
+
+    // Operadores simples
+    if (atual_ == '+') { avanca(); return {MAIS, "+"}; }
+    if (atual_ == '-') { avanca(); return {MENOS, "-"}; }
+    if (atual_ == '*') { avanca(); return {VEZES, "*"}; }
+    if (atual_ == '/') { avanca(); return {DIVIDIDO, "/"}; }
+    if (atual_ == '!') { avanca(); return {NEGACAO, "!"}; }
+    if (atual_ == '<') { avanca(); return {MENOR, "<"}; }
+    if (atual_ == '>') { avanca(); return {MAIOR, ">"}; }
+    if (atual_ == '=') { avanca(); return {IGUAL, "="}; }
+    if (atual_ == ':') { avanca(); return {DOIS_PONTOS, ":"}; }
+
+    // Pontuação
+    if (atual_ == ';') { avanca(); return {PONTO_E_VIRGULA, ";"}; }
+    if (atual_ == '(') { avanca(); return {ABRE_PARENTESE, "("}; }
+    if (atual_ == ')') { avanca(); return {FECHA_PARENTESE, ")"}; }
+    if (atual_ == '{') { avanca(); return {ABRE_CHAVE, "{"}; }
+    if (atual_ == '}') { avanca(); return {FECHA_CHAVE, "}"}; }
+
+    // Constante de caractere
     if (atual_ == '\'') {
         avanca(); // pula a aspa
         if (atual_ != '\0' && texto_[pos_ + 1] == '\'') {
@@ -73,18 +93,22 @@ Token Lexer::proximo_token() {
         }
     }
 
+    // String
     if (atual_ == '"') {
         return identifica_texto();
     }
 
+    // Número
     if (isdigit(atual_)) {
         return identifica_numero();
     }
 
+    // Identificador ou palavra-chave
     if (isalpha(atual_) || atual_ == '_') {
         return identifica_identificador_ou_palavra_chave();
     }
 
+    // Qualquer outro caractere inválido
     std::string err(1, atual_);
     avanca();
     return {ERRO, err};
@@ -116,10 +140,6 @@ Token Lexer::identifica_numero() {
         avanca();
     }
 
-    if (tem_ponto) {
-        return {NUMERO, valor};  // Ainda usamos NUMERO, sem novo token FLOAT_LITERAL
-    }
-
     return {NUMERO, valor};
 }
 
@@ -144,6 +164,9 @@ Token Lexer::identifica_identificador_ou_palavra_chave() {
     if (valor == "bool") return {BOOL, valor};
     if (valor == "string") return {STRING, valor};
     if (valor == "void") return {VOID, valor};
+
+    if (valor == "true") return {TRUE, valor};
+    if (valor == "false") return {FALSE, valor};
 
     return {IDENTIFICADOR, valor};
 }

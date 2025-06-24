@@ -29,33 +29,18 @@ void Parser::erro(const std::string& msg) {
     std::cerr << "\033[1;31mErro de sintaxe: " << msg << "\033[0m" << std::endl;
 }
 
-/* anterior; o compilador para apos achar o primeiro erro
-bool Parser::parse() {
-    while (peek().tipo != FIM_ARQUIVO) {
-        if (!parse_comando()) {
-            return false;
-        }
-    }
-    return true;
-}
-*/
-///*
 bool Parser::parse() {
     bool sucesso = true;
-
     while (peek().tipo != FIM_ARQUIVO) {
         if (!parse_comando()) {
-            sucesso = false; // continua, mesmo após erro
+            sucesso = false;
         }
     }
-
     return sucesso;
 }
-//*/
 
 bool Parser::parse_comando() {
     Token t = peek();
-
     switch (t.tipo) {
         case VAR:
             return parse_declaracao();
@@ -78,7 +63,6 @@ bool Parser::parse_comando() {
     }
 }
 
-// var <id> : <tipo> = <valor opcional> ;
 bool Parser::parse_declaracao() {
     if (!match(VAR)) {
         erro("Esperado 'var' no início da declaração");
@@ -102,45 +86,14 @@ bool Parser::parse_declaracao() {
         return false;
     }
 
-    // Verifica se a variável já foi declarada
-    if(!declararVariavel(id.valor, tipo.valor)){
+    if (!declararVariavel(id.valor, tipo.valor)) {
         erro("Variável '" + id.valor + "' já foi declarada.");
         return false;
     }
 
-    bool tem_valor = false;
-    Token val;
-
     if (match(IGUAL)) {
-        tem_valor = true;
-        val = peek();
-        if (!(match(NUMERO) || match(TEXTO) || match(IDENTIFICADOR) || match(CHAR))) {
-            erro("Esperado valor após '='");
-            return false;
-        }
-
-        // 🔍 Verificações semânticas por tipo
-        if (val.tipo == NUMERO) {
-            if (val.valor.find('.') != std::string::npos) {
-                if (tipo.valor != "float") {
-                    erro("Tipo incompatível: valor decimal em variável '" + id.valor + "' do tipo " + tipo.valor);
-                    return false;
-                }
-            } else {
-                if (tipo.valor != "int") {
-                    erro("Tipo incompatível: valor inteiro em variável '" + id.valor + "' do tipo " + tipo.valor);
-                    return false;
-                }
-            }
-        }
-
-        if (val.tipo == TEXTO && tipo.valor != "string") {
-            erro("Tipo incompatível: valor textual em variável '" + id.valor + "' do tipo " + tipo.valor);
-            return false;
-        }
-
-        if (val.tipo == CHAR && tipo.valor != "char") {
-            erro("Tipo incompatível: valor char em variável '" + id.valor + "' do tipo " + tipo.valor);
+        if (!parse_expressao()) {
+            erro("Expressão inválida após '='");
             return false;
         }
     }
@@ -150,12 +103,7 @@ bool Parser::parse_declaracao() {
         return false;
     }
 
-    std::cout << "\033[1;32mDeclaração reconhecida:\033[0m var " << id.valor << " : " << tipo.valor;
-    if (tem_valor) {
-        std::cout << " = " << val.valor;
-    }
-    std::cout << ";" << std::endl;
-
+    std::cout << "\033[1;32mDeclaração reconhecida:\033[0m var " << id.valor << " : " << tipo.valor << ";" << std::endl;
     return true;
 }
 
@@ -171,17 +119,8 @@ bool Parser::parse_print() {
         return false;
     }
 
-    // Verifica se o conteúdo do print é válido e, se for identificador, se foi declarado
-    if (peek().tipo == IDENTIFICADOR) {
-        if (!variavelDeclarada(peek().valor)) {
-            erro("Variável '" + peek().valor + "' não declarada antes do uso em print");
-            return false;
-        }
-        advance();
-    } else if (peek().tipo == TEXTO || peek().tipo == NUMERO) {
-        advance();
-    } else {
-        erro("Esperado valor para print");
+    if (!parse_expressao()) {
+        erro("Expressão inválida no print");
         return false;
     }
 
@@ -518,6 +457,86 @@ bool Parser::parse_func() {
     std::cout << "\033[1;32mFunção reconhecida\033[0m" << std::endl;
     return true;
 }
+
+
+// expressao -> termo (( "+" | "-" | "==" | "!=" | ">" | "<" | ">=" | "<=" | "&&" | "||" ) termo)*
+bool Parser::parse_expressao() {
+    if (!parse_termo()) return false;
+
+    while (true) {
+        TokenTipo tipo = peek().tipo;
+        if (tipo == IGUAL_IGUAL || tipo == DIFERENTE || tipo == MAIOR || tipo == MENOR ||
+            tipo == MAIOR_IGUAL || tipo == MENOR_IGUAL || tipo == MAIS || tipo == MENOS ||
+            tipo == E_LOGICO || tipo == OU_LOGICO) {
+            advance();
+            if (!parse_termo()) {
+                erro("Esperado termo após operador");
+                return false;
+            }
+        } else {
+            break;
+        }
+    }
+
+    return true;
+}
+
+// termo -> fator ( ( "*" | "/" ) fator )*
+bool Parser::parse_termo() {
+    if (!parse_fator()) return false;
+
+    while (peek().tipo == VEZES || peek().tipo == DIVIDIDO) {
+        advance();
+        if (!parse_fator()) {
+            erro("Esperado fator após operador");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// fator -> número | identificador | texto | "(" expressao ")"
+bool Parser::parse_fator() {
+    Token atual = peek();
+
+    if (atual.tipo == TRUE || atual.tipo == FALSE) {
+    advance();
+    return true;
+    }
+
+
+    if (atual.tipo == NUMERO || atual.tipo == TEXTO || atual.tipo == CHAR) {
+        advance();
+        return true;
+    }
+
+    if (atual.tipo == IDENTIFICADOR) {
+        if (!variavelDeclarada(atual.valor)) {
+            erro("Variável '" + atual.valor + "' não declarada");
+            return false;
+        }
+        advance();
+        return true;
+    }
+
+    if (match(ABRE_PARENTESE)) {
+        if (!parse_expressao()) return false;
+        if (!match(FECHA_PARENTESE)) {
+            erro("Esperado ')' após expressão");
+            return false;
+        }
+        return true;
+    }
+
+    erro("Fator inesperado: " + atual.valor);
+    return false;
+}
+
+
+
+
+
 
 void Parser::entrarEscopo() {
     escopos_.emplace_back(); // adiciona um novo mapa vazio no topo da pilha

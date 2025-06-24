@@ -1,9 +1,10 @@
 // Variáveis globais
-var nome: string = "João";
-var idade: int = 25;
+var nome: int = 25;
+var idade: int = nome + 25;
 var ativo: bool = true;
 var letra: char = 'J';
 var nota: float = 8.5;
+
 
 print(nome);
 print(idade);
@@ -27,7 +28,6 @@ if (ativo) {
 while (ativo) {
     var verificado: bool = true;
     print(verificado);
-    break;
 }
 
 // For com escopo próprio
@@ -35,6 +35,3 @@ for (var i: int = 0; i; i) {
     var dentroDoFor: string = "Repetindo...";
     print(dentroDoFor);
 }
-
-// Usando variável global depois dos blocos
-print(nome);
