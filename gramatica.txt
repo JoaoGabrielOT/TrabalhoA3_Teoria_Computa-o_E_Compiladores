@@ -1,26 +1,108 @@
-<programa> ::= <comando>* EOF
+======================================= Terminais ===============================================
 
-<comando> ::= <declaracao> | <print> | <input> | <if> | <while> | <for> | <func>
+VAR         → "var"
+IDENT       → identificador
+COLON       → ":"
+TIPO        → "int" | "float" | "string" | "char" | "bool"
+EQ          → "="
+LITERAL     → inteiro | float | string | char | "true" | "false"
+SEMICOLON   → ";"
 
-<declaracao> ::= "var" IDENTIFICADOR ":" <tipo> [ "=" <valor> ] ";"
+PRINT       → "print"
+INPUT       → "input"
 
-<tipo> ::= "int" | "float" | "char" | "bool" | "string"
+IF          → "if"
+ELSE        → "else"
+WHILE       → "while"
+FOR         → "for"
 
-<valor> ::= NUMERO | TEXTO | IDENTIFICADOR
+FUNC        → "func"
+VOID        → "void"
 
-<print> ::= "print" "(" <valor> ")" ";"
+ABRE_PAREN  → "("
+FECHA_PAREN → ")"
+ABRE_CHAVE  → "{"
+FECHA_CHAVE → "}"
 
-<input> ::= "input" "(" IDENTIFICADOR ")" ";"
+OP_ARIT     → "+" | "-" | "*" | "/"
+OP_REL      → "==" | "!=" | "<" | "<=" | ">" | ">="
+OP_LOG      → "&&" | "||" | "!"
 
-<if> ::= "if" "(" <condicao> ")" "{" <comando>* "}"
-         [ "else" "{" <comando>* "}" ]
+CHAR        → caractere entre aspas simples
+STRING      → texto entre aspas duplas
+NUMERO      → inteiro | decimal
 
-<while> ::= "while" "(" <condicao> ")" "{" <comando>* "}"
+============================== Não Terminais ==============================================
 
-<for> ::= "for" "(" <declaracao> <condicao> ";" <incremento> ")" "{" <comando>* "}"
+<programa>
+<lista_declaracoes>
+<declaracao>
+<tipo>
+<literal>
+<expressao>
+<bloco>
+<comando>
+<lista_comandos>
+<funcao>
+<parametros>
+<chamada_funcao>
+<input>
+<print>
+<estrutura_controle>
+============================= Regras ====================================
 
-<func> ::= "func" IDENTIFICADOR "(" ")" "{" <comando>* "}"
+<programa>              → <lista_declaracoes>
 
-<condicao> ::= IDENTIFICADOR | NUMERO
+<lista_declaracoes>     → <declaracao> <lista_declaracoes> 
+                        | <funcao> <lista_declaracoes>
+                        | ε
 
-<incremento> ::= IDENTIFICADOR | NUMERO
+<declaracao>            → VAR IDENT COLON <tipo> EQ <literal> SEMICOLON
+
+<tipo>                  → "int" | "float" | "string" | "char" | "bool"
+
+<literal>               → <inteiro> | <float> | STRING | CHAR | "true" | "false"
+
+<inteiro>               → <digito> | <digito> <inteiro>
+<float>                 → <inteiro> "." <inteiro>
+<digito>                → 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+<funcao>                → FUNC IDENT ABRE_PAREN <parametros> FECHA_PAREN COLON <tipo> <bloco>
+                        | FUNC IDENT ABRE_PAREN <parametros> FECHA_PAREN COLON VOID <bloco>
+
+<parametros>            → IDENT COLON <tipo> | IDENT COLON <tipo> "," <parametros> | ε
+
+<bloco>                 → ABRE_CHAVE <lista_comandos> FECHA_CHAVE
+
+<lista_comandos>        → <comando> <lista_comandos> | ε
+
+<comando>               → <declaracao>
+                        | <input>
+                        | <print>
+                        | <estrutura_controle>
+                        | <chamada_funcao> SEMICOLON
+
+<input>                 → IDENT EQ INPUT ABRE_PAREN FECHA_PAREN SEMICOLON
+
+<print>                 → PRINT ABRE_PAREN <expressao> FECHA_PAREN SEMICOLON
+
+<estrutura_controle>    → IF ABRE_PAREN <expressao> FECHA_PAREN <bloco> <opcional_else>
+                        | WHILE ABRE_PAREN <expressao> FECHA_PAREN <bloco>
+                        | FOR ABRE_PAREN <declaracao> <expressao> SEMICOLON <expressao> FECHA_PAREN <bloco>
+
+<opcional_else>         → ELSE <bloco> | ε
+
+<chamada_funcao>        → IDENT ABRE_PAREN <lista_argumentos> FECHA_PAREN
+
+<lista_argumentos>      → <expressao> | <expressao> "," <lista_argumentos> | ε
+
+<expressao>             → <expressao> OP_ARIT <expressao>
+                        | <expressao> OP_REL <expressao>
+                        | <expressao> OP_LOG <expressao>
+                        | OP_LOG <expressao>
+                        | ABRE_PAREN <expressao> FECHA_PAREN
+                        | IDENT
+                        | <literal>
+
+IDENT                   → <letra> | <letra> IDENT
+<letra>                 → [a-zA-Z]+

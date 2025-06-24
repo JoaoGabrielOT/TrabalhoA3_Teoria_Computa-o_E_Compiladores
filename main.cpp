@@ -32,6 +32,20 @@ std::string nome_token(TokenTipo tipo) {
         case FECHA_CHAVE: return "FECHA_CHAVE";
         case FIM_ARQUIVO: return "FIM_ARQUIVO";
         case ERRO: return "ERRO";
+        // Expressoes
+        case MAIS: return "MAIS";
+        case MENOS: return "MENOS";
+        case VEZES: return "VEZES";
+        case DIVIDIDO: return "DIVIDIDO";
+        case IGUAL_IGUAL: return "IGUAL_IGUAL";
+        case DIFERENTE: return "DIFERENTE";
+        case MENOR: return "MENOR";
+        case MENOR_IGUAL: return "MENOR_IGUAL";
+        case MAIOR: return "MAIOR";
+        case MAIOR_IGUAL: return "MAIOR_IGUAL";
+        case E_LOGICO: return "E_LOGICO";
+        case OU_LOGICO: return "OU_LOGICO";
+        case NEGACAO: return "NEGACAO";
         default: return "DESCONHECIDO";
     }
 }
