@@ -30,6 +30,9 @@ private:
     bool parse_while();
     bool parse_for();
     bool parse_func();
+    bool parse_expressao();
+    bool parse_termo();
+    bool parse_fator();
 
     void erro(const std::string& msg);
 };
